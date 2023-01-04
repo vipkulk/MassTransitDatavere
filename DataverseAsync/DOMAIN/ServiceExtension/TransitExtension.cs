@@ -24,7 +24,7 @@ namespace DOMAIN.ServiceExtension
                 x.SetKebabCaseEndpointNameFormatter();
                 x.AddSagaStateMachine<CreateStateMachine, CreateState, CreateSagaDefinition>()
                 .MessageSessionRepository();
-                x.AddConsumer<AcceptConsumer>();
+                x.AddConsumer<AcceptConsumer, AcceptConsumerDefinition>();
                 x.AddConsumer<SubmitConsumer>();
                 x.AddRequestClient<SubmitMessage>();
                 x.UsingAzureServiceBus((context, cfg) =>
@@ -37,6 +37,7 @@ namespace DOMAIN.ServiceExtension
                     cfg.Send<AcceptMessage>(x =>
                     {
                         x.UseSessionIdFormatter(context => context.Message.Id.ToString());
+                        
                     });
                     cfg.ConfigureEndpoints(context);
                 });
