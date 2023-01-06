@@ -16,8 +16,14 @@ namespace API.Controllers
             {
                 ["firstname"] = customer.FirstName,
                 ["lastname"] = customer.LastName,
+                ["jobtitle"]= customer.JobTitle,
+                ["emailaddress1"] = customer.Email,
+                ["mobilephone"]= customer.MobilePhone,
+                ["address1_line1"]= customer.Address,
+                ["address1_city"]= customer.City,
+                ["address1_country"]= customer.Country
             };
-            var response =await transitOrganizationService.Update(contact);
+            var response =await transitOrganizationService.Create(contact);
             return Accepted(response);
         }
     }
