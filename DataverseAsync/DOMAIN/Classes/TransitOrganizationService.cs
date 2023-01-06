@@ -8,30 +8,36 @@ namespace DOMAIN.Classes
 
     public sealed class TransitOrganizationService : ITransitOrganizationService
     {
-        private readonly IBus _bus;
-        private readonly IRequestClient<SubmitMessage> _requestClient;
+        private readonly IPublishEndpoint _publishEndpoint;
 
-        public TransitOrganizationService(IBus bus, IRequestClient<SubmitMessage> requestClient)
+        public TransitOrganizationService(IPublishEndpoint publishEndpoint)
         {
-            _bus = bus;
-            _requestClient = requestClient;
+            _publishEndpoint = publishEndpoint;
+
         }
 
         public async Task<SubmitResponse> Create(Entity entity)
         {
             var attributes = new Dictionary<string, object>();
+            var Id = Guid.NewGuid();
             foreach (var item in entity.Attributes)
             {
                 attributes.Add(item.Key,item.Value);
             }
-            var createMessage = new SubmitMessage()
+            var createMessage = new AcceptMessage()
             {
                 Operation = Operations.Create,
+                TimeStamp = DateTime.UtcNow,
                 LogicalName = entity.LogicalName,
                 AttributeCollection = attributes,
-                Id = Guid.NewGuid(),
+                Id = Id,
             };
-          return (await _requestClient.GetResponse<SubmitResponse>(createMessage).ConfigureAwait(false)).Message;
+            await _publishEndpoint.Publish(createMessage);
+            return new SubmitResponse()
+            {
+                Id = Id,
+                isSumbitted = true,
+            };
         }
 
         public async Task<SubmitResponse> Update(Entity entity)
@@ -43,20 +49,27 @@ namespace DOMAIN.Classes
                     isSumbitted = false,
                 };
             }
+            var Id = Guid.NewGuid();
             var attributes = new Dictionary<string, object>();
             foreach (var item in entity.Attributes)
             {
                 attributes.Add(item.Key, item.Value);
             }
             attributes.Add("RecordId", entity.Id);
-            var updateMessage = new SubmitMessage()
+            var updateMessage = new AcceptMessage()
             {
                 Operation = Operations.Update,
+                TimeStamp= DateTime.UtcNow,
                 LogicalName = entity.LogicalName,
                 AttributeCollection = attributes,
                 Id = Guid.NewGuid(),
             };
-            return (await _requestClient.GetResponse<SubmitResponse>(updateMessage).ConfigureAwait(false)).Message;
+            await _publishEndpoint.Publish(updateMessage);
+            return new SubmitResponse()
+            {
+                Id = Id,
+                isSumbitted = true,
+            };
         }
     }
 }

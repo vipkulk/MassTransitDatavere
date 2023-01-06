@@ -26,5 +26,18 @@ namespace API.Controllers
             var response =await transitOrganizationService.Create(contact);
             return Accepted(response);
         }
+
+        [HttpPatch]
+        public async Task<IActionResult> Update([FromBody] CustomerUpdate customer, [FromServices] ITransitOrganizationService transitOrganizationService)
+        {
+            var contact = new Entity("contact")
+            {
+                ["firstname"] = customer.FirstName
+            };
+            contact.Id = customer.Id;
+            var response = await transitOrganizationService.Update(contact);
+            return Accepted(response);
+        }
+
     }
 }

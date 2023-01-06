@@ -25,15 +25,9 @@ namespace DOMAIN.ServiceExtension
                 x.AddSagaStateMachine<CreateStateMachine, CreateState, CreateSagaDefinition>()
                 .MessageSessionRepository();
                 x.AddConsumer<AcceptConsumer, AcceptConsumerDefinition>();
-                x.AddConsumer<SubmitConsumer>();
-                x.AddRequestClient<SubmitMessage>();
                 x.UsingAzureServiceBus((context, cfg) =>
                 {
                     cfg.Host(serviceBusConnection);
-                    cfg.Send<SubmitMessage>(x =>
-                    {
-                        x.UseSessionIdFormatter(context => context.Message.Id.ToString());
-                    });
                     cfg.Send<AcceptMessage>(x =>
                     {
                         x.UseSessionIdFormatter(context => context.Message.Id.ToString());

@@ -1,3 +1,4 @@
+using DOMAIN;
 using DOMAIN.ServiceExtension;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +10,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.ConfigureTransit(builder.Configuration["Dataverse"], builder.Configuration["ServiceBus"]);
+builder.Services.Configure<ConfigurationOptions>(builder.Configuration.GetSection(ConfigurationOptions.Configuration));
 builder.Services.AddApplicationInsightsTelemetry();
 
 var app = builder.Build();
