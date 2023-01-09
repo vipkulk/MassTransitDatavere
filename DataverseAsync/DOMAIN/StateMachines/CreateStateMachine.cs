@@ -30,11 +30,9 @@ namespace DOMAIN.StateMachines
                 .Then(x => Console.WriteLine($"Id:{x.Saga.CorrelationId} , State:{x.Saga.CurrentState}")));
 
         }
-
         public State Accepted { get; private set; }
         public State Completed { get; private set; }
         public State Conflicted { get; private set; }
-
 
         public Event<AcceptMessage> AcceptData { get; private set; }
         public Event<CompleteMessage> CompleteData { get; private set; }
