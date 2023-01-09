@@ -7,5 +7,7 @@
         public string LogicalName { get; set; }
         public string Operation { get; set; }
         public Dictionary<string, object> AttributeCollection { get; set; }
+        public Dictionary<string, object> Results { get; set; }
+        public object? ClientRequest { get; set; }
     }
 }

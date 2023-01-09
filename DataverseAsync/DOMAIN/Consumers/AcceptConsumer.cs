@@ -19,74 +19,161 @@ namespace DOMAIN.Consumers
         }
         public async Task Consume(ConsumeContext<AcceptMessage> context)       
         {
-            var data = new Entity(context.Message.LogicalName);
-            if(context.Message.AttributeCollection.TryGetValue("RecordId", out var dataverseId)) 
-            {
-                data.Id = new Guid((string)dataverseId);
-                context.Message.AttributeCollection.Remove("RecordId");
-            }
-            foreach (var item in context.Message.AttributeCollection)
-            {
-                data.Attributes.Add(item.Key, item.Value);
-            }
+
             switch (context.Message.Operation)
             {
                 case Operations.Create:
-                    var Id = await _serviceAsync.CreateAsync(data).ConfigureAwait(false);
+                    var createData = new Entity(context.Message.LogicalName);
+                    foreach (var item in context.Message.AttributeCollection)
+                    {
+                        PupulateEntity(createData, item);
+
+                    }
+                    var Id = await _serviceAsync.CreateAsync(createData).ConfigureAwait(false);
                     await context.Publish(new CompleteMessage
                     {
                         Operation = context.Message.Operation,
                         DataverseId = Id,
                         RequestId = context.Message.Id,
                         LogicalName = context.Message.LogicalName,
-                        AttributeCollection = context.Message.AttributeCollection
+                        AttributeCollection = context.Message.AttributeCollection,
+                        ClientRequest = context.Message.ClientRequest,                        
                     });
                     break;
                 case Operations.Update:
+                    var updateData = new Entity(context.Message.LogicalName);
+                    if (context.Message.AttributeCollection.TryGetValue("RecordId", out var dataverseId))
+                    {
+                        updateData.Id = new Guid((string)dataverseId);
+                        context.Message.AttributeCollection.Remove("RecordId");
+                    }
+                    foreach (var item in context.Message.AttributeCollection)
+                    {
+                        updateData.Attributes.Add(item.Key, item.Value);
+                    }
                     if (string.IsNullOrEmpty(_options.Value?.DateTimeColumnForAvoidingFaultyUpdates))
                     {
-                        await _serviceAsync.UpdateAsync(data).ConfigureAwait(false);
+                        await _serviceAsync.UpdateAsync(updateData).ConfigureAwait(false);
                         await context.Publish(new CompleteMessage
                         {
                             Operation = context.Message.Operation,
-                            DataverseId = data.Id,
+                            DataverseId = updateData.Id,
                             RequestId = context.Message.Id,
                             LogicalName = context.Message.LogicalName,
-                            AttributeCollection = context.Message.AttributeCollection
+                            AttributeCollection = context.Message.AttributeCollection,
+                            ClientRequest = context.Message.ClientRequest
                         });
                     }
                     else
                     {
                         var column = _options?.Value?.DateTimeColumnForAvoidingFaultyUpdates;
-                        var modifiedon = (await _serviceAsync.RetrieveAsync(context.Message.LogicalName, data.Id, new ColumnSet(column)).ConfigureAwait(false))
+                        var modifiedon = (await _serviceAsync.RetrieveAsync(context.Message.LogicalName, updateData.Id, new ColumnSet(column)).ConfigureAwait(false))
                                           .GetAttributeValue<DateTime>(column);
                         if (DateTime.Compare(modifiedon, context.Message.TimeStamp) < 0)
                         {
-                            data[column] = context.Message.TimeStamp;
-                            await _serviceAsync.UpdateAsync(data).ConfigureAwait(false);
+                            updateData[column] = context.Message.TimeStamp;
+                            await _serviceAsync.UpdateAsync(updateData).ConfigureAwait(false);
                             await context.Publish(new CompleteMessage
                             {
                                 Operation = context.Message.Operation,
-                                DataverseId = data.Id,
+                                DataverseId = updateData.Id,
                                 RequestId = context.Message.Id,
                                 LogicalName = context.Message.LogicalName,
-                                AttributeCollection = context.Message.AttributeCollection
+                                AttributeCollection = context.Message.AttributeCollection,
+                                ClientRequest = context.Message.ClientRequest
                             });
                         }
                         await context.Publish(new ConflictedUpdateMessage
                         {
                             TimeStamp = context.Message.TimeStamp,
                             Operation = context.Message.Operation,
-                            DataverseId = data.Id,
+                            DataverseId = updateData.Id,
                             RequestId = context.Message.Id,
                             LogicalName = context.Message.LogicalName,
-                            AttributeCollection = context.Message.AttributeCollection
+                            AttributeCollection = context.Message.AttributeCollection,
+                            ClientRequest = context.Message.ClientRequest
                         });
                     }
-
+                    break;
+                case Operations.Execute:
+                    var req = new OrganizationRequest(context.Message.LogicalName);
+                    foreach (var item in context.Message.AttributeCollection)
+                    {
+                        req.Parameters.Add(item.Key, item.Value);
+                    }
+                    var response = _serviceAsync.Execute(req);
+                    var responseDetails = new Dictionary<string, object>();
+                    foreach (var item in response.Results)
+                    {
+                        responseDetails.Add(item.Key, item.Value);
+                    }
+                    await context.Publish(new CompleteMessage
+                    {
+                        Operation = context.Message.Operation,
+                        RequestId = context.Message.Id,
+                        LogicalName = context.Message.LogicalName,
+                        AttributeCollection = context.Message.AttributeCollection,
+                        Results = responseDetails                         
+                    });
                     break;
                 default:
                     throw new NotImplementedException($"{context.Message.Operation} not implemented");
+            }
+        }
+
+        private static void PupulateEntity(Entity createData, KeyValuePair<string, object> item)
+        {
+            switch (item.Key.Split(Operations.ColumnSplitter)[1])
+            {
+                case nameof(EntityReference):
+                    var dict = (Dictionary<string, object>)item.Value;
+                    var keyAttributes = new KeyAttributeCollection();
+                    foreach (var keyAttribute in (List<object>)dict["keyAttributes"])
+                    {
+                        var attributeDict = (Dictionary<string, object>)keyAttribute;
+                        var key = (string)attributeDict["key"];
+                        var value = attributeDict["value"];
+                        keyAttributes.Add(key, value);
+                    }
+                    if (keyAttributes.Count > 0)
+                    {
+                        createData[item.Key.Split(Operations.ColumnSplitter)[0]] = new EntityReference((string)dict["logicalName"], keyAttributes);
+                    }
+                    else
+                    {
+                        createData[item.Key.Split(Operations.ColumnSplitter)[0]] = new EntityReference((string)dict["logicalName"], new Guid((string)dict["id"]));
+                    }
+                    break;
+                case nameof(OptionSetValue):
+                    createData[item.Key.Split(Operations.ColumnSplitter)[0]] = new OptionSetValue(Convert.ToInt32(((Dictionary<string, object>)item.Value)["value"]));
+                    break;
+                case nameof(Money):
+                    createData[item.Key.Split(Operations.ColumnSplitter)[0]] = new Money(Convert.ToDecimal(((Dictionary<string, object>)item.Value)["value"]));
+                    break;
+                case nameof(String):
+                    createData.Attributes.Add(item.Key.Split(Operations.ColumnSplitter)[0], item.Value);
+                    break;
+                case nameof(Boolean):
+                    createData.Attributes.Add(item.Key.Split(Operations.ColumnSplitter)[0], Convert.ToBoolean(item.Value));
+                    break;
+                case nameof(DateTime):
+                    createData.Attributes.Add(item.Key.Split(Operations.ColumnSplitter)[0], Convert.ToDateTime(item.Value));
+                    break;
+                case nameof(Decimal):
+                    createData.Attributes.Add(item.Key.Split(Operations.ColumnSplitter)[0], Convert.ToDecimal(item.Value));
+                    break;
+                case nameof(Double):
+                    createData.Attributes.Add(item.Key.Split(Operations.ColumnSplitter)[0], Convert.ToDouble(item.Value));
+                    break;
+                case nameof(Int32):
+                    createData.Attributes.Add(item.Key.Split(Operations.ColumnSplitter)[0], Convert.ToInt32(item.Value));
+                    break;
+                case nameof(Int64):
+                    createData.Attributes.Add(item.Key.Split(Operations.ColumnSplitter)[0], Convert.ToInt64(item.Value));
+                    break;
+                default:
+                    createData.Attributes.Add(item.Key.Split(Operations.ColumnSplitter)[0], item.Value);
+                    break;
             }
         }
     }

@@ -15,6 +15,9 @@ namespace DOMAIN.StateMachines
             Initially(
                 When(AcceptData)
                     .TransitionTo(Accepted)
+                     .Then(x => Console.WriteLine($"Id:{x.Saga.CorrelationId} , State:{x.Saga.CurrentState}")),
+                When(ConflictData)
+                     .TransitionTo(Conflicted)
                      .Then(x => Console.WriteLine($"Id:{x.Saga.CorrelationId} , State:{x.Saga.CurrentState}"))
                 );
            During(Accepted,

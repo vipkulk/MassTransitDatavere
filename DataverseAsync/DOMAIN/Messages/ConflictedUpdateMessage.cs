@@ -8,5 +8,6 @@
         public string Operation { get; set; }
         public DateTime TimeStamp { get; set; }
         public Dictionary<string, object> AttributeCollection { get; set; }
+        public object? ClientRequest { get; set; }
     }
 }

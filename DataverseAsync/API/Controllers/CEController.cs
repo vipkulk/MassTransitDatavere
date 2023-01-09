@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.PowerPlatform.Dataverse.Client;
 using Microsoft.Xrm.Sdk;
+using System.Globalization;
 
 namespace API.Controllers
 {
@@ -21,7 +22,13 @@ namespace API.Controllers
                 ["mobilephone"] = customer.MobilePhone,
                 ["address1_line1"] = customer.Address,
                 ["address1_city"] = customer.City,
-                ["address1_country"] = customer.Country
+                ["address1_country"] = customer.Country,
+                ["ownerid"] = new EntityReference("systemuser", new Guid("d4b0cf0f-597e-ed11-81ad-000d3aa88402")),
+                ["preferredcontactmethodcode"] = new OptionSetValue(2),
+                ["creditlimit"] = new Money(100),
+                ["donotfax"] = true,
+                ["new_decimal"] = Convert.ToDecimal(100.56),
+                ["importsequencenumber"] = Convert.ToInt32(100)
             };
             var crmId = service.Create(contact);
             var response = new SubmitResponse()
