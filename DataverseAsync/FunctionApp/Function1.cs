@@ -23,7 +23,6 @@ namespace FunctionApp
                 ["address1_line1"] = customer.Address,
                 ["address1_city"] = customer.City,
                 ["address1_country"] = customer.Country,
-                ["ownerid"] = new EntityReference("systemuser", new Guid("89ba8bde-748e-ed11-aad0-000d3ab6fe24")),
                 ["preferredcontactmethodcode"] = new OptionSetValue(2),
                 ["creditlimit"] = new Money(100),
                 ["donotfax"] = true,

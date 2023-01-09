@@ -16,7 +16,7 @@ namespace DOMAIN.Classes
 
         }
 
-        public async Task<SubmitResponse> Create(Entity entity, object? inputRequest = null)
+        public async Task<SubmitResponse> Create(Entity entity, object? inputRequest = null, CancellationToken cancellationToken=default)
         {
             var attributes = new Dictionary<string, object>();
             var Id = Guid.NewGuid();
@@ -33,7 +33,7 @@ namespace DOMAIN.Classes
                 Id = Id,
                 ClientRequest = inputRequest
             };
-            await _publishEndpoint.Publish(createMessage);
+            await _publishEndpoint.Publish(createMessage,cancellationToken);
             return new SubmitResponse()
             {
                 Id = Id,
@@ -41,13 +41,13 @@ namespace DOMAIN.Classes
             };
         }
 
-        public async Task<SubmitResponse> Execute(OrganizationRequest request)
+        public async Task<SubmitResponse> Execute(OrganizationRequest request, object? inputRequest = null, CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, object>();
             var Id = Guid.NewGuid();
             foreach (var item in request.Parameters)
             {
-                parameters.Add(item.Key, item.Value);
+                parameters.Add($"{item.Key}{Operations.ColumnSplitter}{request[item.Key].GetType().Name}", request[item.Key]);
             }
             var executeMessage = new AcceptMessage()
             {
@@ -56,8 +56,9 @@ namespace DOMAIN.Classes
                 LogicalName = request.RequestName,
                 AttributeCollection = parameters,
                 Id = Id,
+                ClientRequest = inputRequest
             };
-            await _publishEndpoint.Publish(request);
+            await _publishEndpoint.Publish(executeMessage, cancellationToken);
             return new SubmitResponse()
             {
                 Id = Guid.NewGuid(),
@@ -65,7 +66,7 @@ namespace DOMAIN.Classes
             };
         }
 
-        public async Task<SubmitResponse> Update(Entity entity,object? inputRequest = null)
+        public async Task<SubmitResponse> Update(Entity entity,object? inputRequest = null, CancellationToken cancellationToken = default)
         {
             if (entity.Id == Guid.Empty)
             {
@@ -78,7 +79,7 @@ namespace DOMAIN.Classes
             var attributes = new Dictionary<string, object>();
             foreach (var item in entity.Attributes)
             {
-                attributes.Add(item.Key, item.Value);
+                attributes.Add($"{item.Key}{Operations.ColumnSplitter}{entity[item.Key].GetType().Name}", entity[item.Key]);
             }
             attributes.Add("RecordId", entity.Id);
             var updateMessage = new AcceptMessage()
@@ -90,7 +91,7 @@ namespace DOMAIN.Classes
                 Id = Guid.NewGuid(),
                 ClientRequest = inputRequest
             };
-            await _publishEndpoint.Publish(updateMessage);
+            await _publishEndpoint.Publish(updateMessage, cancellationToken);
             return new SubmitResponse()
             {
                 Id = Id,

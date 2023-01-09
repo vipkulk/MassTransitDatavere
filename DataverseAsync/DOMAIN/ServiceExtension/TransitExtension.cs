@@ -1,8 +1,6 @@
 ﻿using DOMAIN.Classes;
 using DOMAIN.Consumers;
 using DOMAIN.Interfaces;
-using DOMAIN.Messages;
-using DOMAIN.StateMachines;
 using MassTransit;
 using Microsoft.ApplicationInsights.DependencyCollector;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,7 +10,10 @@ namespace DOMAIN.ServiceExtension
 {
     public static class TransitExtension
     {
-        public static IServiceCollection ConfigureTransit(this IServiceCollection services,string dataverseConnectionString,string serviceBusConnection)
+        public static IServiceCollection ConfigureTransit(this IServiceCollection services,string dataverseConnectionString,BusType busType
+            ,Action<IBusRegistrationContext,IServiceBusBusFactoryConfigurator> azureServicebusConfiguration =null
+            ,Action<IBusRegistrationContext, IRabbitMqBusFactoryConfigurator> rabbitMQConfiguration = null
+            )
         {
             services.AddApplicationInsightsTelemetry();
             services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((x, y) =>
@@ -22,19 +23,16 @@ namespace DOMAIN.ServiceExtension
             services.AddMassTransit(x =>
             {
                 x.SetKebabCaseEndpointNameFormatter();
-                x.AddSagaStateMachine<CreateStateMachine, CreateState, CreateSagaDefinition>()
-                .MessageSessionRepository();
                 x.AddConsumer<AcceptConsumer, AcceptConsumerDefinition>();
-                x.UsingAzureServiceBus((context, cfg) =>
+                if(busType== BusType.AzureServiceBus)
                 {
-                    cfg.Host(serviceBusConnection);
-                    cfg.Send<AcceptMessage>(x =>
-                    {
-                        x.UseSessionIdFormatter(context => context.Message.Id.ToString());
-                        
-                    });
-                    cfg.ConfigureEndpoints(context);
-                });
+                    x.UsingAzureServiceBus(azureServicebusConfiguration);
+                }
+                else
+                {
+                    x.UsingRabbitMq(rabbitMQConfiguration);
+                }
+                
             });
             services.AddSingleton(new ServiceClient(dataverseConnectionString));
             services.AddScoped<IOrganizationServiceAsync2>(x =>

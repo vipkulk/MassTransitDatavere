@@ -13,9 +13,9 @@ namespace DOMAIN.Consumers
         }
         protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator, IConsumerConfigurator<AcceptConsumer> consumerConfigurator)
         {
-            if(_options.Value?.RateLimitPerMinute > 0)
+            if(_options.Value?.RateLimitPerMinuteForCEProcess > 0)
             {
-                endpointConfigurator.UseRateLimit(_options.Value.RateLimitPerMinute, TimeSpan.FromMinutes(1));
+                endpointConfigurator.UseRateLimit(_options.Value.RateLimitPerMinuteForCEProcess, TimeSpan.FromMinutes(1));
             }
             else
             {

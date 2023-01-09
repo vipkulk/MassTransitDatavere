@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.PowerPlatform.Dataverse.Client;
 using Microsoft.Xrm.Sdk;
+using System;
 using System.Globalization;
 
 namespace API.Controllers
@@ -13,27 +14,34 @@ namespace API.Controllers
         [HttpPost]
         public ActionResult Create([FromBody] Customer customer, [FromServices] IOrganizationServiceAsync2 service)
         {
-            var contact = new Entity("contact")
+            //var contact = new Entity("contact")
+            //{
+            //    ["firstname"] = customer.FirstName,
+            //    ["lastname"] = customer.LastName,
+            //    ["jobtitle"] = customer.JobTitle,
+            //    ["emailaddress1"] = customer.Email,
+            //    ["mobilephone"] = customer.MobilePhone,
+            //    ["address1_line1"] = customer.Address,
+            //    ["address1_city"] = customer.City,
+            //    ["address1_country"] = customer.Country,
+            //    ["ownerid"] = new EntityReference("systemuser", new Guid("d4b0cf0f-597e-ed11-81ad-000d3aa88402")),
+            //    ["preferredcontactmethodcode"] = new OptionSetValue(2),
+            //    ["creditlimit"] = new Money(100),
+            //    ["donotfax"] = true,
+            //    ["new_decimal"] = Convert.ToDecimal(100.56),
+            //    ["importsequencenumber"] = Convert.ToInt32(100)
+            //};
+            //var crmId = service.Create(contact);
+            var req = new OrganizationRequest("sample_CustomAPIExample")
             {
-                ["firstname"] = customer.FirstName,
-                ["lastname"] = customer.LastName,
-                ["jobtitle"] = customer.JobTitle,
-                ["emailaddress1"] = customer.Email,
-                ["mobilephone"] = customer.MobilePhone,
-                ["address1_line1"] = customer.Address,
-                ["address1_city"] = customer.City,
-                ["address1_country"] = customer.Country,
-                ["ownerid"] = new EntityReference("systemuser", new Guid("d4b0cf0f-597e-ed11-81ad-000d3aa88402")),
-                ["preferredcontactmethodcode"] = new OptionSetValue(2),
-                ["creditlimit"] = new Money(100),
-                ["donotfax"] = true,
-                ["new_decimal"] = Convert.ToDecimal(100.56),
-                ["importsequencenumber"] = Convert.ToInt32(100)
+                ["StringParameter"] = "CVB"
             };
-            var crmId = service.Create(contact);
+
+            var resp = service.Execute(req);
+
             var response = new SubmitResponse()
             {
-                Id = crmId,
+                Id = Guid.NewGuid(),
                 isSumbitted = true,
             };
             return Ok(response);
