@@ -19,7 +19,6 @@ namespace DOMAIN.Consumers
         }
         public async Task Consume(ConsumeContext<AcceptMessage> context)       
         {
-
             switch (context.Message.Operation)
             {
                 case Operations.Create:
