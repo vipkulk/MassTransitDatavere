@@ -5,17 +5,14 @@ using Microsoft.Xrm.Sdk;
 
 namespace DOMAIN.Classes
 {
-
     public sealed class TransitOrganizationService : ITransitOrganizationService
     {
         private readonly IPublishEndpoint _publishEndpoint;
-
         public TransitOrganizationService(IPublishEndpoint publishEndpoint)
         {
             _publishEndpoint = publishEndpoint;
 
         }
-
         public async Task<SubmitResponse> Create(Entity entity, object? inputRequest = null, CancellationToken cancellationToken=default)
         {
             var attributes = new Dictionary<string, object>();
@@ -40,7 +37,6 @@ namespace DOMAIN.Classes
                 isSumbitted = true,
             };
         }
-
         public async Task<SubmitResponse> Execute(OrganizationRequest request, object? inputRequest = null, CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, object>();
@@ -65,7 +61,6 @@ namespace DOMAIN.Classes
                 isSumbitted = true,
             };
         }
-
         public async Task<SubmitResponse> Update(Entity entity,object? inputRequest = null, CancellationToken cancellationToken = default)
         {
             if (entity.Id == Guid.Empty)

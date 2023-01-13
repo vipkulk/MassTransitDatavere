@@ -11,9 +11,13 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.ConfigureTransit(builder.Configuration["Dataverse"],BusType.AzureServiceBus,(context, cfg) =>
+builder.Services.ConfigureTransit(builder.Configuration["Dataverse"],BusType.RabbitMQ,rabbitMQConfiguration:(context , cfg) =>
 {
-    cfg.Host(builder.Configuration["ServiceBus"]);
+    cfg.Host("localhost","/", h => {
+        h.Username("guest");
+        h.Password("guest");
+    });
+
     cfg.ConfigureEndpoints(context);
 });
 builder.Services.Configure<ConfigurationOptions>(builder.Configuration.GetSection(ConfigurationOptions.Configuration));
