@@ -1,1 +1,2 @@
 # MassTransitDatavere
+This library is useful when you want to develop Publish/Subscribe pattern based api to push data inside Dataverse.This libarary provides a wrapper around organization service of dataverse, methods exposed by this library are same as methods of organization service, however in background operations done in asynchronous manner. Library handles creation of Azure resources (Service Bus Topics for OperaionCompleted data, Error data) required for its functioning and you can subcribe to those topics to access operation status and related data.   
