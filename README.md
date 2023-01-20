@@ -237,4 +237,13 @@ Library Currenly Supports Below Messages
 
 *Currently CustomAPI with request parameter type Entity and EntityCollection are **not** supported.
 
+## Limiting number of requests made to dataverse per minute
+You can limit number of requests made to dataverse per minute by using below setting in Environment Variable or Adding it as Configuration Value in App Service
+
+**Configuration__RateLimitPerMinute**
+
+![image](https://user-images.githubusercontent.com/69874658/213780994-de9d6062-eeca-4cb0-83ce-8cc6c1faa462.png)
+
+Library will make sure only those requestes are made to dataverse per minute despite of number of request received. Default value for this parameter is 800
+
 
