@@ -16,8 +16,11 @@ This library maintains Azure infrastructure for you and gives generic interface 
 
 ## How to Use Library
  
-Add below using statement on the top of Prgarm.cs
- ```c#using MassTransit;
+If you are using .Net6 or above:
+
+Add below using statement on the top of Progarm.cs file
+ ```c#
+ using MassTransit;
  ```
 Add below lines in Program.cs if you are using .Net6 or above
  ```c#
@@ -28,7 +31,24 @@ builder.Services.ConfigureTransit(builder.Configuration["Dataverse"],BusType.Azu
 });
 ```
 
-If you are using .Net5 Or Below add below lines under ConfigureServices method in Startup.cs file
+If you are using .Net5 Or below: 
+
+Add below using statement on the top of Startup.cs file
+ ```c#
+ using MassTransit;
+ ```
+Add below lines under ConfigureServices method in Startup.cs file
+ ```c#
+services.ConfigureTransit(Configuration["Dataverse"], BusType.AzureServiceBus, azureServicebusConfiguration: (context, cfg) =>
+{
+                cfg.Host(Configuration["ServiceBus"]);
+                cfg.ConfigureEndpoints(context);
+});
+ ```
+ 
+ 
+ Here 
+ "Dataverse" : Connection string for datverse please refer this link for more information https://docs.microsoft.com/en-us/powerapps/developer/common-data-service/xrm-tooling/use-connection-strings-xrm-tooling-connect 
 
 
 
