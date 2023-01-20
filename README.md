@@ -14,3 +14,16 @@ This library maintains Azure infrastructure for you and gives generic interface 
 ![image](https://user-images.githubusercontent.com/69874658/212421107-e39449fb-7602-43f2-9cd2-fc7ff84b149a.png)
 
 
+## How to Use Library
+ 
+Add below lines in Program.cs if you are using .Net6 or above 
+ ```c#
+builder.Services.ConfigureTransit(builder.Configuration["Dataverse"],BusType.AzureServiceBus,azureServicebusConfiguration:(context, cfg) =>
+{
+    cfg.Host(builder.Configuration["ServiceBus"]);
+    cfg.ConfigureEndpoints(context);
+});
+```
+
+
+
