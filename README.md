@@ -246,4 +246,18 @@ You can limit number of requests made to dataverse per minute by using below set
 
 Library will make sure only those requestes are made to dataverse per minute despite of number of request received. Default value for this parameter is 800
 
+## Avoiding Faulty Updates
+As library does makes transactions in dataverse in multiple parallel threads there is no gurantee that requests will be processed in same sequence as they were received.
+
+So in this case there is a chance that out of 2 update requestes update which is made earlier will be processed after request made in later time e.g. if update requests to one entity are made at 10:00:00 AM and 10:00:01 AM then there is chance that request made at 10:00:01 AM will be processed first and request made at 10:00:00 AM will be processed later which will result in inconsistant state at dataverse side
+
+This can be avoided by creating a datetime field on entity on which you are doing update via library and specifying this field name  in Environemnt Variable
+**Configuration__DateTimeColumnForAvoidingFaultyUpdates**
+
+![image](https://user-images.githubusercontent.com/69874658/213784565-b09ada85-fbad-4959-89be-1f6fdf7385be.png)
+
+*Please make sure you keep name of field same for all entities on which you intend to do update via this library
+
+In this case library will make sure message recived at 10:00:00 will be skipped if message received at 10:00:01 is already processed.
+These skipped messages will be avialble in seprate Topic. Client can subscribe to that topic so that it knows about state of its request.
 
