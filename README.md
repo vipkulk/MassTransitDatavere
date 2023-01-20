@@ -49,6 +49,8 @@ services.ConfigureTransit(Configuration["Dataverse"], BusType.AzureServiceBus, a
  
  Here 
  "Dataverse" : Connection string for datverse please refer this link for more information https://docs.microsoft.com/en-us/powerapps/developer/common-data-service/xrm-tooling/use-connection-strings-xrm-tooling-connect 
+ 
+ "ServiceBus": Connection string for Azure Service Bus Namespace. Please make sure SAS connection string has access to create Azure Service Bus Topics. Please use Azure Service Bus on Standard Tier. 
 
 
 
