@@ -228,3 +228,13 @@ Fault Message will look like this
 
 id will be same as id you got in response so that client knows which request is faulted.
 
+## Supported Dataverse Messages
+
+Library Currenly Supports Below Messages
+1. Create
+2. Update
+3. Execute (Only for executing Custom APIs)
+
+*Currently CustomAPI with request parameter type Entity and EntityCollection are not supported.
+
+
