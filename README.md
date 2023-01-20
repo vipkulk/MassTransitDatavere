@@ -16,7 +16,7 @@ This library maintains Azure infrastructure for you and gives generic interface 
 
 ## How to Use Library
  
-If you are using .Net6 or above:
+**If you are using .Net6 or above:**
 
 Add below using statement on the top of Progarm.cs file
  ```c#
@@ -31,7 +31,7 @@ builder.Services.ConfigureTransit(builder.Configuration["Dataverse"],BusType.Azu
 });
 ```
 
-If you are using .Net5 Or below: 
+**If you are using .Net5 Or below:** 
 
 Add below using statement on the top of Startup.cs file
  ```c#
@@ -48,9 +48,9 @@ services.ConfigureTransit(Configuration["Dataverse"], BusType.AzureServiceBus, a
  
  
  Here 
- "Dataverse" : Connection string for datverse please refer this link for more information https://docs.microsoft.com/en-us/powerapps/developer/common-data-service/xrm-tooling/use-connection-strings-xrm-tooling-connect 
+ **"Dataverse"** : Connection string for datverse please refer this link for more information https://docs.microsoft.com/en-us/powerapps/developer/common-data-service/xrm-tooling/use-connection-strings-xrm-tooling-connect 
  
- "ServiceBus": Connection string for Azure Service Bus Namespace. Please make sure SAS connection string has access to create Azure Service Bus Topics. Please use Azure Service Bus on Standard Tier. 
+ **"ServiceBus"**: Connection string for Azure Service Bus Namespace. Please make sure SAS connection string has access to create Azure Service Bus Topics. Please use Azure Service Bus on Standard Tier. 
 
 
 
