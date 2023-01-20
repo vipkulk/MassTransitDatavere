@@ -54,6 +54,59 @@ services.ConfigureTransit(Configuration["Dataverse"], BusType.AzureServiceBus, a
  
 Sample API Code is avialable in project with Project Name API you can refer it.
 
+**Sample Code for Create Request**
+
+ ```c#	
+public async Task<IActionResult> Create([FromBody] Customer customer, [FromServices] ITransitOrganizationService transitOrganizationService, CancellationToken cancellationToken= default)
+        {
+            var contact = new Entity("contact")
+            {
+                ["firstname"] = customer.FirstName,
+                ["lastname"] = customer.LastName,
+                ["jobtitle"] = customer.JobTitle,
+                ["emailaddress1"] = customer.Email,
+                ["mobilephone"] = customer.MobilePhone,
+                ["address1_line1"] = customer.Address,
+                ["address1_city"] = customer.City,
+                ["address1_country"] = customer.Country,
+                ["numberofchildren"] = "10"
+            };
+            var response =await transitOrganizationService.Create(contact,customer,cancellationToken);
+            return Accepted(response);
+        }
+```
+**Sample Code for Update Request**
+
+ ```c#	
+        public async Task<IActionResult> Update([FromBody] CustomerUpdate customer, [FromServices] ITransitOrganizationService transitOrganizationService, CancellationToken cancellationToken = default)
+        {
+            var contact = new Entity("contact")
+            {
+                ["firstname"] = customer.FirstName
+            };
+            contact.Id = customer.Id;
+            var response = await transitOrganizationService.Update(contact,customer,cancellationToken);
+            return Accepted(response);
+        }
+```
+
+**Sample Code for Execute Request**
+
+ ```c#	
+        public async Task<IActionResult> Execute([FromServices] ITransitOrganizationService transitOrganizationService,CancellationToken cancellationToken=default)
+        {
+            var req = new OrganizationRequest("sample_CustomAPIExample")
+            {
+                ["StringParameter"] = "CVB"
+            };
+
+            var resp = await transitOrganizationService.Execute(req,cancellationToken:cancellationToken);
+            return Accepted(resp);
+        }
+```
+
+**ITransitOrganizationService** is interface available from library.
+
 When API is run below Topics will be created in Azure Service Bus Namespace 
 
 ![image](https://user-images.githubusercontent.com/69874658/213774277-e0c13814-6d50-4606-88d0-b57898cfad1e.png)
