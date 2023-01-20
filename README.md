@@ -17,7 +17,8 @@ This library maintains Azure infrastructure for you and gives generic interface 
 ## How to Use Library
  
 Add below using statement on the top of Prgarm.cs
- ```c#using MassTransit;```
+ ```c#using MassTransit;
+ ```
 Add below lines in Program.cs if you are using .Net6 or above
  ```c#
 builder.Services.ConfigureTransit(builder.Configuration["Dataverse"],BusType.AzureServiceBus,azureServicebusConfiguration:(context, cfg) =>
