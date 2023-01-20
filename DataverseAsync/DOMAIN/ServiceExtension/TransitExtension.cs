@@ -3,6 +3,7 @@ using DOMAIN.Consumers;
 using DOMAIN.Interfaces;
 using MassTransit;
 using Microsoft.ApplicationInsights.DependencyCollector;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.PowerPlatform.Dataverse.Client;
 
@@ -10,7 +11,7 @@ namespace DOMAIN.ServiceExtension
 {
     public static class TransitExtension
     {
-        public static IServiceCollection ConfigureTransit(this IServiceCollection services,string dataverseConnectionString,BusType busType
+        public static IServiceCollection ConfigureTransit(this IServiceCollection services,string dataverseConnectionString,IConfiguration configuration,BusType busType
             ,Action<IBusRegistrationContext,IServiceBusBusFactoryConfigurator> azureServicebusConfiguration =null
             ,Action<IBusRegistrationContext, IRabbitMqBusFactoryConfigurator> rabbitMQConfiguration = null
             )
@@ -34,6 +35,7 @@ namespace DOMAIN.ServiceExtension
                 }
                 
             });
+            services.Configure<ConfigurationOptions>(configuration.GetSection(ConfigurationOptions.Configuration));
             services.AddSingleton(new ServiceClient(dataverseConnectionString));
             services.AddScoped<IOrganizationServiceAsync2>(x =>
             {
