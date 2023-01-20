@@ -235,6 +235,6 @@ Library Currenly Supports Below Messages
 2. Update
 3. Execute (Only for executing Custom APIs)
 
-*Currently CustomAPI with request parameter type Entity and EntityCollection are not supported.
+*Currently CustomAPI with request parameter type Entity and EntityCollection are **not** supported.
 
 
